@@ -1,17 +1,63 @@
 @echo off
-::请把java.bat和path.bat放入你Java的JDK的根目录下面
+CLS
+ ECHO.
+ ECHO =============================
+ ECHO Running Admin shell
+ ECHO =============================
+
+:init
+ setlocal DisableDelayedExpansion
+ set cmdInvoke=1
+ set winSysFolder=System32
+ set "batchPath=%~0"
+ for %%k in (%0) do set batchName=%%~nk
+ set "vbsGetPrivileges=%temp%\OEgetPriv_%batchName%.vbs"
+ setlocal EnableDelayedExpansion
+
+:checkPrivileges
+  NET FILE 1>NUL 2>NUL
+  if '%errorlevel%' == '0' ( goto gotPrivileges ) else ( goto getPrivileges )
+
+:getPrivileges
+  if '%1'=='ELEV' (echo ELEV & shift /1 & goto gotPrivileges)
+  ECHO.
+  ECHO **************************************
+  ECHO Invoking UAC for Privilege Escalation
+  ECHO **************************************
+
+  ECHO Set UAC = CreateObject^("Shell.Application"^) > "%vbsGetPrivileges%"
+  ECHO args = "ELEV " >> "%vbsGetPrivileges%"
+  ECHO For Each strArg in WScript.Arguments >> "%vbsGetPrivileges%"
+  ECHO args = args ^& strArg ^& " "  >> "%vbsGetPrivileges%"
+  ECHO Next >> "%vbsGetPrivileges%"
+
+  if '%cmdInvoke%'=='1' goto InvokeCmd 
+
+  ECHO UAC.ShellExecute "!batchPath!", args, "", "runas", 1 >> "%vbsGetPrivileges%"
+  goto ExecElevation
+
+:InvokeCmd
+  ECHO args = "/c """ + "!batchPath!" + """ " + args >> "%vbsGetPrivileges%"
+  ECHO UAC.ShellExecute "%SystemRoot%\%winSysFolder%\cmd.exe", args, "", "runas", 1 >> "%vbsGetPrivileges%"
+
+:ExecElevation
+ "%SystemRoot%\%winSysFolder%\WScript.exe" "%vbsGetPrivileges%" %*
+ exit /B
+
+:gotPrivileges
+ setlocal & cd /d %~dp0
+ if '%1'=='ELEV' (del "%vbsGetPrivileges%" 1>nul 2>nul  &  shift /1)
+
+ ::::::::::::::::::::::::::::
+ ::START
+ ::::::::::::::::::::::::::::
 set JDK_PATH=%~dp0
-echo "JDK路径-->"%JDK_PATH%
-::设置"JAVA_HOME"值
+echo "Java JDK Path:"%JDK_PATH%
 setx /M JAVA_HOME "%JDK_PATH%"
-::设置"CLASS_PATH"值
-setx /M CLASS_PATH "%JDK_PATH%lib\dt.jar;%JDK_PATH%lib\tools.jar"
-::获取系统的"PATH"变量值
+setx /M CLASS_PATH "%%JAVA_HOME%%lib\dt.jar;%%JAVA_HOME%%lib\tools.jar"
 set path =%PATH%
 ::备份PATH变量，保存在C:\Users\用户名\Documents下(文档里面)
 echo %PATH% > C:\Users\%username%\Documents\cpath.txt
-::拼接
-set cpath="%path%;%JDK_PATH%bin;%JDK_PATH%jre\binC:Windows\system32"
-::设置"Path"值
+set cpath="%path%;%%JAVA_HOME%%bin;%%JAVA_HOME%%jre\binC:Windows\system32"
 setx /M Path %cpath%
-pause>nul
+pause

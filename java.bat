@@ -53,10 +53,9 @@ CLS
  ::::::::::::::::::::::::::::
 set JDK_PATH=%~dp0
 echo "Java JDK Path:"%JDK_PATH%
-setx /M JAVA_HOME "%JDK_PATH%"
+setx /M JAVA_HOME "%JDK_PATH%
 setx /M CLASS_PATH "%%JAVA_HOME%%lib\dt.jar;%%JAVA_HOME%%lib\tools.jar"
 set path =%PATH%
-::备份PATH变量，保存在C:\Users\用户名\Documents下(文档里面)
 echo %PATH% > C:\Users\%username%\Documents\cpath.txt
 set cpath="%path%;%%JAVA_HOME%%bin;%%JAVA_HOME%%jre\binC:Windows\system32"
 setx /M Path %cpath%

@@ -31,7 +31,7 @@ CLS
   ECHO args = args ^& strArg ^& " "  >> "%vbsGetPrivileges%"
   ECHO Next >> "%vbsGetPrivileges%"
 
-  if '%cmdInvoke%'=='1' goto InvokeCmd 
+  if '%cmdInvoke%'=='1' goto InvokeCmd
 
   ECHO UAC.ShellExecute "!batchPath!", args, "", "runas", 1 >> "%vbsGetPrivileges%"
   goto ExecElevation
@@ -52,11 +52,10 @@ CLS
  ::START
  ::::::::::::::::::::::::::::
 set JDK_PATH=%~dp0
-echo "Java JDK Path:"%JDK_PATH%
+echo "Java JDK Path:" %JDK_PATH%
 setx /M JAVA_HOME "%JDK_PATH%
-setx /M CLASS_PATH "%%JAVA_HOME%%lib\dt.jar;%%JAVA_HOME%%lib\tools.jar"
 set path =%PATH%
-echo %PATH% > C:\Users\%username%\Documents\cpath.txt
+echo %PATH% > %JDK_PATH%cpath.txt
 set cpath="%path%;%%JAVA_HOME%%bin;%%JAVA_HOME%%jre\binC:Windows\system32"
 setx /M Path %cpath%
 pause
